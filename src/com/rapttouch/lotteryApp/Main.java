@@ -7,8 +7,10 @@ import java.util.*;
 
 public class Main {
 
+    private static String invalidEntry = "Invalid entry, please enter 6 valid numbers between 1-48!\n";
+
     static int[] manualPick() {
-        String invalidEntry = "Invalid entry, please enter 6 valid numbers between 1-48!\n";
+        //String invalidEntry = "Invalid entry, please enter 6 valid numbers between 1-48!\n";
         int manualPickArr[] = new int[6];
         boolean inValidEntry = true;
         int numberEntered = 0;
@@ -38,8 +40,17 @@ public class Main {
 
                         if ((Integer.parseInt(strNums[i]) >= 1) && (Integer.parseInt(strNums[i]) <= 48))
                         {
-                                manualPickArr[i] = Integer.parseInt(strNums[i]);
-                                inValidEntry = false;
+                                if(!checkForDuplicates(manualPickArr, Integer.parseInt(strNums[i])))
+                                {
+                                    manualPickArr[i] = Integer.parseInt(strNums[i]);
+                                    inValidEntry = false;
+                                }
+                                else
+                                {
+                                    inValidEntry = true;
+                                    System.out.println(invalidEntry);
+                                    break;
+                                }
                         }
                         else
                         {
@@ -72,14 +83,49 @@ public class Main {
 
     }
 
+    private static boolean checkForDuplicates(int[] manualPickArr, int valueEntered)
+    {
+        boolean duplicate = false;
+        for (int element : manualPickArr)
+        {
+            if (element == valueEntered)
+            {
+                duplicate = true;
+                break;
+            }
+        }
+        return duplicate;
+    }
+
+
 
     static int[] quickPick()
     {
         int quickPickArr[] = new int[6];
         int max = 48;
         int min = 1;
-        for(int i = 0; i<=5; i++)
-            quickPickArr[i] =  getRandomInteger(max, min);
+        int randomValue = 0;
+        boolean inValidEntry = true;
+
+        while (inValidEntry)
+        {
+            for(int i = 0; i<=5; i++)
+            {
+                randomValue = getRandomInteger(max, min);
+                if(!checkForDuplicates(quickPickArr, randomValue))
+                {
+                    quickPickArr[i] = randomValue;
+                    inValidEntry = false;
+                }
+                else
+                {
+                    inValidEntry = true;
+                    System.out.println(invalidEntry);
+                    break;
+                }
+            }
+        }
+
         return quickPickArr;
     }
 
