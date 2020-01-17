@@ -3,10 +3,7 @@ package com.rapttouch.lotteryApp;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
-import java.io.BufferedReader;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -14,7 +11,157 @@ import java.util.InputMismatchException;
 import java.util.Scanner;
 
 public class Main {
+    public static void main(String[] args)
+    {
+        final String welcomeMessage = "Welcome to Lotto Online!";
+        boolean resultLotto;
+        ArrayList<ArrayList<Integer>> returnedList;
+        ArrayList<ArrayList<Integer>> returnedResults;
 
+        System.out.println(welcomeMessage);
+
+        returnedList = makeYourPick();
+        savePicks(returnedList);
+        returnedResults = getTheWinningNumbers();
+        resultLotto = checkResults(returnedResults, returnedList);
+
+        if(resultLotto)
+            System.out.println("You're a winner!!");
+        else
+            System.out.println("Unlucky, try again!");
+    }
+
+    private static ArrayList<ArrayList<Integer>> getTheWinningNumbers()
+    {
+        int[] returnedArr;
+        final byte lottoSize = 5;
+        final String resultsFileName = "results";
+        ArrayList<ArrayList<Integer>> resultLists = new ArrayList<>();
+
+        var storeLottoResults = new ArrayList<Integer>();
+        returnedArr = getRandomNumbers(lottoSize);
+        for (int value : returnedArr) storeLottoResults.add(value);
+        resultLists.add(storeLottoResults);
+        writeToJsonFile(resultsFileName, resultLists);
+        return resultLists;
+    }
+
+    private static void savePicks(ArrayList<ArrayList<Integer>> returnedList)
+    {
+        final String safePicksQuestion = "Would you like to save your picks to a file? \n Enter: 'Yes' or 'No'";
+        boolean invalidEntrySaveNumbers = true;
+        boolean duplicateName = true;
+        String currentDirectory = System.getProperty("user.dir");
+
+        Scanner scanner = new Scanner(System .in);
+        System.out.println(safePicksQuestion);
+        while(invalidEntrySaveNumbers)
+        {
+            String anotherSelectionEntered = scanner.nextLine();
+            if (anotherSelectionEntered.toLowerCase().contains("yes"))
+            {
+                System.out.println("Please enter a file name:");
+                while(duplicateName)
+                {
+                    String fileName = scanner.nextLine();
+                    currentDirectory += "\\" + fileName + ".json";
+                    File f = new File(currentDirectory);
+                    System.out.println(currentDirectory);
+                    if (f.exists() && !f.isDirectory())
+                    {
+                        System.out.println("Filename already exists, would you like to overwrite?");
+                        String overWriteFile = scanner.nextLine();
+                        if (overWriteFile.toLowerCase().contains("yes"))
+                        {
+                            writeToJsonFile(fileName, returnedList);
+                            duplicateName = false;
+                            invalidEntrySaveNumbers = false;
+                        }
+                        else
+                        {
+                            System.out.println("Please enter a unique name:");
+                        }
+                    }
+                    else
+                    {
+                        writeToJsonFile(fileName, returnedList);
+                        duplicateName = false;
+                        invalidEntrySaveNumbers = false;
+                    }
+                }
+            }
+            else if (anotherSelectionEntered.toLowerCase().contains("no"))
+            {
+                invalidEntrySaveNumbers = false;
+            }
+            else
+            {
+                System.out.println("Invalid entry, Enter: 'Yes' or 'No'");
+            }
+        }
+    }
+
+    private static ArrayList<ArrayList<Integer>> makeYourPick(){
+        final byte quickPickSize = 5;
+        boolean invalidEntry;
+        int inputChoice;
+        int quickNumberLines;
+        int[] returnedArrQuickPick;
+        int[] returnedArrManualPick;
+        boolean anotherPick = true;
+        ArrayList<ArrayList<Integer>> listOLists = new ArrayList<>();
+
+        while(anotherPick)
+        {
+            invalidEntry = true;
+            inputChoice = selectOption();
+            switch (inputChoice)
+            {
+                case 1:
+                    System.out.println("Quick Pick");
+                    quickNumberLines = 0;
+
+                    while(quickNumberLines < 4)
+                    {
+                        var storeAllArrayQuick = new ArrayList<Integer>();
+                        returnedArrQuickPick = getRandomNumbers(quickPickSize);
+                        for (int value : returnedArrQuickPick) storeAllArrayQuick.add(value);
+                        listOLists.add(storeAllArrayQuick);
+                        quickNumberLines += 1;
+                    }
+                    break;
+                case 2:
+                    System.out.println("Manual Pick");
+                    var storeAllArrayManual = new ArrayList<Integer>();
+                    returnedArrManualPick = manualPick();
+                    for (int value : returnedArrManualPick) storeAllArrayManual.add(value);
+                    listOLists.add(storeAllArrayManual);
+                    break;
+                case 3:
+                    System.exit(0);
+            }
+
+            System.out.println("Would you like to make another selection?\n Enter: 'Yes' or 'No'");
+            Scanner scanner = new Scanner(System. in);
+            while(invalidEntry)
+            {
+                String anotherSelectionEntered = scanner.nextLine();
+                if (anotherSelectionEntered.toLowerCase().contains("yes"))
+                {
+                    invalidEntry = false;
+                }
+                else if (anotherSelectionEntered.toLowerCase().contains("no"))
+                {
+                    invalidEntry = false;
+                    anotherPick = false;
+                }
+                else
+                    System.out.println("Invalid entry, Enter: 'Yes' or 'No'");
+            }
+
+        }
+        return listOLists;
+    }
     private static int[] manualPick() {
         int[] manualPickArr = new int[6];
         boolean inValidEntry = true;
@@ -164,20 +311,22 @@ public class Main {
         ArrayList<Integer> checkArr1;
         ArrayList<Integer> checkArr2;
         checkArr1 = resultLists.get(0);
+        boolean winner = false;
 
-        for (ArrayList<Integer> listOList : listOLists) {
-            boolean winner = false;
+        for (ArrayList<Integer> listOList : listOLists)
+        {
+            winner = false;
             checkArr2 = listOList;
 
-            for (Integer integer : checkArr1) {
+            for (Integer integer : checkArr1)
+            {
                 if (checkArr2.contains(integer))
                     winner = true;
                 else
                     break;
             }
-            return winner;
         }
-        return false;
+        return winner;
     }
     private static void writeToJsonFile(String fileName, ArrayList<ArrayList<Integer>> listOLists)
     {
@@ -198,102 +347,6 @@ public class Main {
         {
             System.out.println("Failed to create Json file: " + fileName);
         }
-    }
-
-    public static void main(String[] args)
-    {
-        byte quickPickSize = 5;
-        String resultsFileName = "results";
-        int inputChoice;
-        int[] returnedArr;
-        boolean anotherPick = true;
-        boolean invalidEntrySaveNumbers = true;
-        boolean resultLotto;
-
-        ArrayList<ArrayList<Integer>> listOLists = new ArrayList<>();
-        ArrayList<ArrayList<Integer>> resultLists = new ArrayList<>();
-
-        String welcomeMessage = "Welcome to Lotto Online!";
-        System.out.println(welcomeMessage);
-
-        while(anotherPick)
-        {
-            boolean invalidEntry = true;
-            inputChoice = selectOption();
-            switch (inputChoice)
-            {
-                case 1:
-                    int quickNumberLines = 0;
-                    System.out.println("Quick Pick");
-                    while (quickNumberLines < 4)
-                    {
-                        var storeAllArrayQuick = new ArrayList<Integer>();
-                        returnedArr = getRandomNumbers(quickPickSize);
-                        for (int value : returnedArr) storeAllArrayQuick.add(value);
-                        listOLists.add(storeAllArrayQuick);
-                        quickNumberLines += 1;
-                    }
-                    break;
-                case 2:
-                    System.out.println("Manual Pick");
-                    var storeAllArrayManual = new ArrayList<Integer>();
-                    returnedArr = manualPick();
-                    for (int value : returnedArr) storeAllArrayManual.add(value);
-                    listOLists.add(storeAllArrayManual);
-                    break;
-                case 3:
-                    System.exit(0);
-            }
-
-            System.out.println("Would you like to make another selection?\n Enter: 'Yes' or 'No'");
-            Scanner scanner = new Scanner(System. in);
-            while(invalidEntry)
-            {
-                String anotherSelectionEntered = scanner.nextLine();
-                if (anotherSelectionEntered.toLowerCase().contains("yes"))
-                {
-                    invalidEntry = false;
-                }
-                else if (anotherSelectionEntered.toLowerCase().contains("no"))
-                {
-                    invalidEntry = false;
-                    anotherPick = false;
-                }
-                else
-                    System.out.println("Invalid entry, Enter: 'Yes' or 'No'");
-            }
-        }
-        System.out.println("Would you like to save your picks to a file? \n Enter: 'Yes' or 'No'");
-        Scanner scanner = new Scanner(System .in);
-        while(invalidEntrySaveNumbers)
-        {
-            String anotherSelectionEntered = scanner.nextLine();
-            if (anotherSelectionEntered.toLowerCase().contains("yes"))
-            {
-                System.out.println("Please enter a file name:");
-                String fileName = scanner.nextLine();
-                invalidEntrySaveNumbers = false;
-                writeToJsonFile(fileName, listOLists);
-            }
-            else if (anotherSelectionEntered.toLowerCase().contains("no"))
-            {
-                invalidEntrySaveNumbers = false;
-            } else
-                System.out.println("Invalid entry, Enter: 'Yes' or 'No'");
-        }
-
-        var storeLottoResults = new ArrayList<Integer>();
-        returnedArr = getRandomNumbers(quickPickSize);
-        for (int value : returnedArr) storeLottoResults.add(value);
-        resultLists.add(storeLottoResults);
-        writeToJsonFile(resultsFileName, resultLists);
-
-        resultLotto = checkResults(resultLists, listOLists);
-
-        if(resultLotto)
-            System.out.println("You're a winner!!");
-        else
-            System.out.println("Unlucky, try again!");
     }
 }
 
