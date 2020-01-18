@@ -8,6 +8,7 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.InputMismatchException;
+import java.util.List;
 import java.util.Scanner;
 
 public class Main {
@@ -327,18 +328,32 @@ public class Main {
         ArrayList<Integer> checkArr2;
         checkArr1 = resultLists.get(0);
         boolean winner = false;
+        final int WINNING_LENGTH = 6;
 
         for (ArrayList<Integer> listOList : listOLists)
         {
+            List<Integer> matches = new ArrayList<>();
             winner = false;
             checkArr2 = listOList;
 
             for (Integer integer : checkArr1)
             {
                 if (checkArr2.contains(integer))
+                {
+                    matches.add(integer);
+                }
+            }
+            if (!matches.isEmpty())
+            {
+                System.out.println(matches.size() + " Matched for " + checkArr2.toString() + ". Matches : " + matches.toString());
+                if(matches.size() == WINNING_LENGTH)
+                {
                     winner = true;
-                else
-                    break;
+                }
+            }
+            else
+            {
+                System.out.println("Nothing Matched for : " + checkArr2.toString());
             }
         }
         return winner;
@@ -364,5 +379,3 @@ public class Main {
         }
     }
 }
-
-
