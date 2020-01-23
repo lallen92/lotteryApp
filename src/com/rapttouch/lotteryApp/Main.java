@@ -15,13 +15,63 @@ public class Main {
     public static void main(String[] args)
     {
         final String welcomeMessage = "Welcome to Lotto Online!";
+        final String anotherEntry = "Would you like to make another selection?\n Enter: 'Yes' or 'No'";
+        final String optionsMessage = new StringBuilder()
+                .append("For 'Quick Pick' selection, please enter the Number: 1\n")
+                .append("For manual selection, please the number: 2,\n")
+                .append("To exit the application, please press the number: 3").toString();
+        int inputChoice = -1;
         boolean resultLotto;
-        ArrayList<ArrayList<Integer>> returnedList;
+        boolean invalidEntry = true;
+        boolean anotherPick = true;
+
+        int numberEntered = 0;
+
+
+        ArrayList<ArrayList<Integer>> returnedList = null;
         ArrayList<ArrayList<Integer>> returnedResults;
 
         System.out.println(welcomeMessage);
 
-        returnedList = makeYourPick();
+        while (inputChoice == -1)
+        {
+            try
+            {
+                System.out.println(optionsMessage);
+                Scanner input = new Scanner(System.in);
+                numberEntered = input.nextInt();
+                inputChoice = selectOption(numberEntered);
+            }
+            catch (InputMismatchException e)
+            {
+                System.out.println("Invalid entry, please enter a valid option!\n");
+            }
+        }
+        while(anotherPick)
+        {
+            returnedList = makeYourPick(inputChoice);
+
+            System.out.println(anotherEntry);
+            Scanner scanner = new Scanner(System.in);
+            while (invalidEntry)
+            {
+                String anotherSelectionEntered = scanner.nextLine();
+                if (anotherSelectionEntered.toLowerCase().contains("yes"))
+                {
+                    invalidEntry = false;
+                }
+                else if (anotherSelectionEntered.toLowerCase().contains("no"))
+                {
+                    invalidEntry = false;
+                    anotherPick = false;
+                }
+                else
+                {
+                    System.out.println("Invalid entry, Enter: 'Yes' or 'No'");
+                }
+            }
+        }
+
         savePicks(returnedList);
         returnedResults = getTheWinningNumbers();
         resultLotto = checkResults(returnedResults, returnedList);
@@ -33,22 +83,15 @@ public class Main {
     }
 
 
-    private static ArrayList<ArrayList<Integer>> makeYourPick()
+    public static ArrayList<ArrayList<Integer>> makeYourPick(int inputChoice)
     {
-        final String anotherEntry = "Would you like to make another selection?\n Enter: 'Yes' or 'No'";
         final byte quickPickSize = 5;
-        boolean invalidEntry;
-        int inputChoice;
         int quickNumberLines;
         int[] returnedArrQuickPick;
         int[] returnedArrManualPick;
-        boolean anotherPick = true;
+
         ArrayList<ArrayList<Integer>> listOLists = new ArrayList<>();
 
-        while(anotherPick)
-        {
-            invalidEntry = true;
-            inputChoice = selectOption();
             switch (inputChoice)
             {
                 case 1:
@@ -75,66 +118,28 @@ public class Main {
                     System.exit(0);
             }
 
-            System.out.println(anotherEntry);
-            Scanner scanner = new Scanner(System. in);
-            while(invalidEntry)
-            {
-                String anotherSelectionEntered = scanner.nextLine();
-                if (anotherSelectionEntered.toLowerCase().contains("yes"))
-                {
-                    invalidEntry = false;
-                }
-                else if (anotherSelectionEntered.toLowerCase().contains("no"))
-                {
-                    invalidEntry = false;
-                    anotherPick = false;
-                }
-                else
-                    System.out.println("Invalid entry, Enter: 'Yes' or 'No'");
-            }
-        }
         return listOLists;
     }
 
 
-    private static int selectOption()
+    public static int selectOption(int numberEntered)
     {
-        String optionsMessage = new StringBuilder()
-                .append("For 'Quick Pick' selection, please enter the Number: 1\n")
-                .append("For manual selection, please the number: 2,\n")
-                .append("To exit the application, please press the number: 3").toString();
+        int validEntry = 0;
 
-        boolean inValidEntry = true;
-        int numberEntered = 0;
+            if ((numberEntered >=1) &&( numberEntered <= 3))
+            {
+                validEntry = numberEntered;
+            }
+            else
+            {
+                validEntry = -1;
+            }
 
-        while (inValidEntry)
-        {
-            System.out.println(optionsMessage);
-            Scanner input = new Scanner(System.in);
-            try
-            {
-                numberEntered = input.nextInt();
-                if ((numberEntered >=1) &&( numberEntered <= 3)) {
-                    inValidEntry = false;
-                }
-                else
-                {
-                    inValidEntry = true;
-                    System.out.println("Invalid entry, please enter a valid option!\n");
-                }
-            }
-            catch (InputMismatchException e)
-            {
-                inValidEntry = true;
-                System.out.println("Invalid entry, please enter a valid option!\n");
-            }
-        }
-        System.out.println();
-        return numberEntered;
+        return validEntry;
     }
 
 
-    private static int[] getRandomNumbers(byte loopSize)
+    public static int[] getRandomNumbers(byte loopSize)
     {
         int[] quickPickArr = new int[6];
         int max = 48;
@@ -163,13 +168,13 @@ public class Main {
     }
 
 
-    private static int getRandomInteger(int maximum, int minimum)
+    public static int getRandomInteger(int maximum, int minimum)
     {
         return ((int) (Math.random() * (maximum - minimum))) + minimum;
     }
 
 
-    private static boolean checkForDuplicates(int[] manualPickArr, int valueEntered)
+    public static boolean checkForDuplicates(int[] manualPickArr, int valueEntered)
     {
         boolean duplicate = false;
         for (int element : manualPickArr)
@@ -184,7 +189,7 @@ public class Main {
     }
 
 
-    private static ArrayList<ArrayList<Integer>> getTheWinningNumbers()
+    public static ArrayList<ArrayList<Integer>> getTheWinningNumbers()
     {
         int[] returnedArr;
         final byte lottoSize = 5;
@@ -201,7 +206,7 @@ public class Main {
         return resultLists;
     }
 
-    private static void savePicks(ArrayList<ArrayList<Integer>> returnedList)
+    public static void savePicks(ArrayList<ArrayList<Integer>> returnedList)
     {
         final String safePicksQuestion = "Would you like to save your picks to a file? \n Enter: 'Yes' or 'No'";
         boolean invalidEntrySaveNumbers = true;
@@ -257,7 +262,7 @@ public class Main {
     }
 
 
-    private static int[] manualPick()
+    public static int[] manualPick()
     {
         int[] manualPickArr = new int[6];
         boolean inValidEntry = true;
@@ -322,7 +327,7 @@ public class Main {
     }
 
 
-    private static boolean checkResults(ArrayList<ArrayList<Integer>> resultLists, ArrayList<ArrayList<Integer>> listOLists)
+    public static boolean checkResults(ArrayList<ArrayList<Integer>> resultLists, ArrayList<ArrayList<Integer>> listOLists)
     {
         ArrayList<Integer> checkArr1;
         ArrayList<Integer> checkArr2;
@@ -358,7 +363,7 @@ public class Main {
         }
         return winner;
     }
-    private static void writeToJsonFile(String fileName, ArrayList<ArrayList<Integer>> listOLists)
+    public static void writeToJsonFile(String fileName, ArrayList<ArrayList<Integer>> listOLists)
     {
         LocalDate localDate = LocalDate.now();
 
